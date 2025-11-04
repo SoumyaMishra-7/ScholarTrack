@@ -1,16 +1,54 @@
-# React + Vite
+ScholarTrack - Scholarship Management Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+<img width="1761" height="925" alt="image" src="https://github.com/user-attachments/assets/e2b05a82-9856-429c-97f7-d39f21896938" />
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A modern, intuitive platform that simplifies the scholarship discovery and application process for students while providing comprehensive management tools for administrators.
 
-## React Compiler
+Features For Students
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🎯 Personalized Matching - Get scholarship recommendations based on your profile
 
-## Expanding the ESLint configuration
+📊 Progress Tracking - Monitor all your applications in one dashboard
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+⚡ Deadline Reminders - Never miss application deadlines
+
+📝 Easy Applications - Apply with pre-filled information and templates
+
+🔒 Verified Opportunities - All scholarships are verified for safety
+<img width="1597" height="993" alt="image" src="https://github.com/user-attachments/assets/30a16712-901a-47ce-a337-ce69ec88b6ad" />
+
+
+
+Features For Administrators
+
+👥 Student Management - Comprehensive student profiles and tracking
+
+💰 Scholarship Management - Create and manage scholarship programs
+
+📋 Application Review - Process and evaluate student applications
+
+📈 Analytics Dashboard - Insights and reporting tools.
+
+🎯 Quick Actions - Efficient workflow management
+<img width="1758" height="1027" alt="image" src="https://github.com/user-attachments/assets/88a2b04e-6cbb-47d1-aa29-abd39c1b48e7" />
+
+
+
+🛠️ Tech Stack
+Frontend:
+
+->React 18 with Hooks
+
+->React Router DOM for navigation
+
+->Tailwind CSS for styling
+
+->Custom SVG icons and illustrations
+
+Data Storage:
+
+->Browser LocalStorage for data persistence
+
+->JSON format for structured data
+
