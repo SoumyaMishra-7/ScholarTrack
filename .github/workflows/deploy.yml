@@ -19,18 +19,18 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: edufundr/package-lock.json  # 👈 Important
+          cache-dependency-path: Edufundr/package-lock.json  # ✅ Corrected path (capital E)
 
       - name: Install dependencies
-        working-directory: ./edufundr   # 👈 Go inside your React folder
+        working-directory: ./Edufundr   # ✅ Enter your actual React folder
         run: npm ci
 
       - name: Build
-        working-directory: ./edufundr
+        working-directory: ./Edufundr
         run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./edufundr/build  # 👈 Path to build folder
+          publish_dir: ./Edufundr/dist  # ✅ For Vite builds, use "dist"
