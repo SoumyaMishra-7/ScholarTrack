@@ -19,34 +19,18 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: edufundr/package-lock.json  # 👈 Important
 
-      # Use npm install instead of npm ci (to work without a lock file)
       - name: Install dependencies
-        run: npm install
+        working-directory: ./edufundr   # 👈 Go inside your React folder
+        run: npm ci
 
-      - name: Build project
+      - name: Build
+        working-directory: ./edufundr
         run: npm run build
 
-      - name: Upload build artifacts
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # 👇 Change this if your output folder is "dist" (for Vite)
-          path: build/
-
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./edufundr/build  # 👈 Path to build folder
