@@ -25,11 +25,14 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: 'Edufundr/package-lock.json'
           
       - name: Install dependencies
+        working-directory: ./Edufundr
         run: npm ci
         
       - name: Build
+        working-directory: ./Edufundr
         run: npm run build
         
       - name: Setup Pages
@@ -38,7 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: Edufundr/dist
 
   deploy:
     environment:
