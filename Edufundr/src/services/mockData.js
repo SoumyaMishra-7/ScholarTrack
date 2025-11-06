@@ -48,7 +48,7 @@ export const mockApplications = [
   {
     id: 1,
     scholarshipId: 1,
-    studentName: "Riya Sharma",
+    studentName: "RiyaSharma",
     studentEmail: "riya@example.com",
     status: "pending",
     appliedDate: "2024-01-15",
