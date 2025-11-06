@@ -7,12 +7,28 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [reviewNotes, setReviewNotes] = useState('');
   
+  // Scholarship Management States
+  const [newScholarship, setNewScholarship] = useState({
+    title: '',
+    description: '',
+    amount: '',
+    deadline: '',
+    eligibility: '',
+    provider: '',
+    category: '',
+    requirements: ''
+  });
+  const [editingScholarship, setEditingScholarship] = useState(null);
+  
   const { 
     scholarships, 
     applications, 
     loading, 
     updateApplicationStatus,
-    loadApplications 
+    loadApplications,
+    createScholarship,
+    updateScholarship,
+    deleteScholarship
   } = useScholarship();
 
   useEffect(() => {
@@ -24,7 +40,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     pendingApplications: applications.filter(app => app.status === 'pending').length,
     approvedApplications: applications.filter(app => app.status === 'approved').length,
     rejectedApplications: applications.filter(app => app.status === 'rejected').length,
-    totalScholarships: scholarships.length
+    totalScholarships: scholarships.length,
+    activeScholarships: scholarships.filter(s => new Date(s.deadline) > new Date()).length
   };
 
   const handleStatusUpdate = async (applicationId, status) => {
@@ -48,9 +65,60 @@ const AdminDashboard = ({ user, onLogout }) => {
     };
   };
 
+  // Scholarship Management Functions
+  const handleCreateScholarship = async (e) => {
+    e.preventDefault();
+    try {
+      await createScholarship(newScholarship);
+      setNewScholarship({
+        title: '',
+        description: '',
+        amount: '',
+        deadline: '',
+        eligibility: '',
+        provider: '',
+        category: '',
+        requirements: ''
+      });
+      alert('Scholarship created successfully!');
+    } catch (error) {
+      alert('Failed to create scholarship');
+    }
+  };
+
+  const handleUpdateScholarship = async (e) => {
+    e.preventDefault();
+    try {
+      await updateScholarship(editingScholarship.id, editingScholarship);
+      setEditingScholarship(null);
+      alert('Scholarship updated successfully!');
+    } catch (error) {
+      alert('Failed to update scholarship');
+    }
+  };
+
+  const handleDeleteScholarship = async (scholarshipId) => {
+    if (window.confirm('Are you sure you want to delete this scholarship?')) {
+      try {
+        await deleteScholarship(scholarshipId);
+        alert('Scholarship deleted successfully!');
+      } catch (error) {
+        alert('Failed to delete scholarship');
+      }
+    }
+  };
+
+  const startEditing = (scholarship) => {
+    setEditingScholarship({ ...scholarship });
+  };
+
+  const cancelEditing = () => {
+    setEditingScholarship(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Similar to StudentDashboard but for Admin */}
+      {/* Header */}
       <div className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
@@ -106,7 +174,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Applications</h3>
                 <p className="text-3xl font-bold text-blue-600">{stats.totalApplications}</p>
@@ -123,9 +191,14 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <p className="text-sm text-gray-500 mt-2">Successful applications</p>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Active Scholarships</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Scholarships</h3>
                 <p className="text-3xl font-bold text-purple-600">{stats.totalScholarships}</p>
                 <p className="text-sm text-gray-500 mt-2">Available programs</p>
+              </div>
+              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Active Scholarships</h3>
+                <p className="text-3xl font-bold text-green-600">{stats.activeScholarships}</p>
+                <p className="text-sm text-gray-500 mt-2">Currently accepting applications</p>
               </div>
             </div>
 
@@ -244,6 +317,224 @@ const AdminDashboard = ({ user, onLogout }) => {
                   <p className="text-gray-500">Student applications will appear here.</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Scholarship Management Tab */}
+        {activeTab === 'scholarships' && (
+          <div className="space-y-8">
+            <div className="flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-gray-900">Manage Scholarships</h2>
+              <div className="text-sm text-gray-500">
+                {scholarships.length} total scholarships • {stats.activeScholarships} active
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Create/Edit Scholarship Form */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">
+                  {editingScholarship ? 'Edit Scholarship' : 'Create New Scholarship'}
+                </h3>
+                
+                <form onSubmit={editingScholarship ? handleUpdateScholarship : handleCreateScholarship}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Scholarship Title *</label>
+                      <input
+                        type="text"
+                        required
+                        value={editingScholarship ? editingScholarship.title : newScholarship.title}
+                        onChange={(e) => editingScholarship 
+                          ? setEditingScholarship({...editingScholarship, title: e.target.value})
+                          : setNewScholarship({...newScholarship, title: e.target.value})
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter scholarship title"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Provider/Organization *</label>
+                      <input
+                        type="text"
+                        required
+                        value={editingScholarship ? editingScholarship.provider : newScholarship.provider}
+                        onChange={(e) => editingScholarship 
+                          ? setEditingScholarship({...editingScholarship, provider: e.target.value})
+                          : setNewScholarship({...newScholarship, provider: e.target.value})
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter provider name"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($) *</label>
+                        <input
+                          type="number"
+                          required
+                          value={editingScholarship ? editingScholarship.amount : newScholarship.amount}
+                          onChange={(e) => editingScholarship 
+                            ? setEditingScholarship({...editingScholarship, amount: e.target.value})
+                            : setNewScholarship({...newScholarship, amount: e.target.value})
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="5000"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Deadline *</label>
+                        <input
+                          type="date"
+                          required
+                          value={editingScholarship ? editingScholarship.deadline : newScholarship.deadline}
+                          onChange={(e) => editingScholarship 
+                            ? setEditingScholarship({...editingScholarship, deadline: e.target.value})
+                            : setNewScholarship({...newScholarship, deadline: e.target.value})
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={editingScholarship ? editingScholarship.description : newScholarship.description}
+                        onChange={(e) => editingScholarship 
+                          ? setEditingScholarship({...editingScholarship, description: e.target.value})
+                          : setNewScholarship({...newScholarship, description: e.target.value})
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Describe the scholarship opportunity..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Eligibility Criteria *</label>
+                      <textarea
+                        required
+                        rows={2}
+                        value={editingScholarship ? editingScholarship.eligibility : newScholarship.eligibility}
+                        onChange={(e) => editingScholarship 
+                          ? setEditingScholarship({...editingScholarship, eligibility: e.target.value})
+                          : setNewScholarship({...newScholarship, eligibility: e.target.value})
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="List eligibility requirements..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
+                      <textarea
+                        rows={2}
+                        value={editingScholarship ? editingScholarship.requirements : newScholarship.requirements}
+                        onChange={(e) => editingScholarship 
+                          ? setEditingScholarship({...editingScholarship, requirements: e.target.value})
+                          : setNewScholarship({...newScholarship, requirements: e.target.value})
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Application requirements..."
+                      />
+                    </div>
+
+                    <div className="flex space-x-4 pt-4">
+                      {editingScholarship ? (
+                        <>
+                          <button
+                            type="submit"
+                            className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                          >
+                            Update Scholarship
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEditing}
+                            className="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition-colors font-semibold"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                        >
+                          Create Scholarship
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              {/* Scholarships List */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Existing Scholarships</h3>
+                
+                {scholarships.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4">🎓</div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Scholarships Created</h3>
+                    <p className="text-gray-500">Create your first scholarship to get started.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                    {scholarships.map((scholarship) => (
+                      <div key={scholarship.id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-colors">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="font-semibold text-gray-900 text-lg">{scholarship.title}</h4>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => startEditing(scholarship)}
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteScholarship(scholarship.id)}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Provider:</span>
+                            <span className="font-medium">{scholarship.provider}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Amount:</span>
+                            <span className="font-semibold text-green-600">${scholarship.amount?.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Deadline:</span>
+                            <span className={`font-medium ${
+                              new Date(scholarship.deadline) < new Date() ? 'text-red-600' : 'text-gray-900'
+                            }`}>
+                              {new Date(scholarship.deadline).toLocaleDateString()}
+                              {new Date(scholarship.deadline) < new Date() && ' (Expired)'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block mb-1">Eligibility:</span>
+                            <p className="text-gray-700 text-xs bg-gray-50 p-2 rounded">{scholarship.eligibility}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -411,14 +702,6 @@ const AdminDashboard = ({ user, onLogout }) => {
                 )}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Other tabs (scholarships, analytics) would go here */}
-        {activeTab === 'scholarships' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Manage Scholarships</h2>
-            <p className="text-gray-500">Scholarship management features coming soon...</p>
           </div>
         )}
 
